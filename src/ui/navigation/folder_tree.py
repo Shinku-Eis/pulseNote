@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ...services.folder_service import FolderService
-from ..signals import signals
+from ..signals import get_signals
 
 
 class FolderTree(QTreeWidget):
@@ -14,6 +14,7 @@ class FolderTree(QTreeWidget):
     def __init__(self, folder_service: FolderService, parent=None):
         super().__init__(parent)
         self._folder_service = folder_service
+        self._signals = get_signals()
         self._setup_ui()
         self._connect_signals()
         self.refresh()
@@ -35,12 +36,12 @@ class FolderTree(QTreeWidget):
 
     def _connect_signals(self):
         self.itemClicked.connect(self._on_item_clicked)
-        signals.folder_changed.connect(self.refresh)
-        signals.note_list_refresh.connect(self.refresh)
+        self._signals.folder_changed.connect(self.refresh)
+        self._signals.note_list_refresh.connect(self.refresh)
 
     def _on_item_clicked(self, item: QTreeWidgetItem, column: int):
         folder_id = item.data(0, Qt.ItemDataRole.UserRole)
-        signals.folder_selected.emit(folder_id)
+        self._signals.folder_selected.emit(folder_id)
 
     def refresh(self):
         expanded = set()
@@ -54,7 +55,7 @@ class FolderTree(QTreeWidget):
         self._add_nodes(self._all_notes_item, tree_data, expanded)
 
         self.setCurrentItem(self._all_notes_item)
-        signals.folder_selected.emit(None)
+        self._signals.folder_selected.emit(None)
 
     def _save_expanded(self, item: QTreeWidgetItem, expanded: set):
         if item.isExpanded():
@@ -93,15 +94,15 @@ class FolderTree(QTreeWidget):
         if ok and name.strip():
             parent_id = self.get_selected_folder_id()
             self._folder_service.create(name.strip(), parent_id)
-            signals.folder_changed.emit()
-            signals.status_message.emit(f'Folder "{name}" created', 3000)
+            self._signals.folder_changed.emit()
+            self._signals.status_message.emit(f'Folder "{name}" created', 3000)
 
     def _on_delete(self, item: QTreeWidgetItem):
         folder_id = item.data(0, Qt.ItemDataRole.UserRole)
         if folder_id:
             self._folder_service.delete(folder_id)
-            signals.folder_changed.emit()
-            signals.status_message.emit("Folder deleted", 3000)
+            self._signals.folder_changed.emit()
+            self._signals.status_message.emit("Folder deleted", 3000)
 
     def get_selected_folder_id(self) -> int | None:
         item = self.currentItem()

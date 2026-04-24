@@ -23,7 +23,7 @@ from ..services.tag_service import TagService
 from ..services.link_service import LinkService
 from ..services.search_service import SearchService
 from ..services.topic_service import TopicService
-from .signals import signals
+from .signals import get_signals
 from .navigation.folder_tree import FolderTree
 from .navigation.note_list import NoteList
 from .navigation.tag_panel import TagPanel
@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.db = db
         self._lazy_widgets = {}
+        self._signals = get_signals()
         self._init_repos()
         self._init_services()
         self._setup_window()
@@ -251,26 +252,26 @@ class MainWindow(QMainWindow):
             self.right_panel.blockSignals(False)
 
     def _connect_signals(self):
-        signals.status_message.connect(self._show_status)
+        self._signals.status_message.connect(self._show_status)
         self.note_list.note_selected.connect(self.editor_widget.load_note)
         self.search_bar.search_result_selected.connect(self.editor_widget.load_note)
-        signals.note_saved.connect(self._update_word_count)
-        signals.note_selected.connect(self._on_note_selected_for_count)
+        self._signals.note_saved.connect(self._update_word_count)
+        self._signals.note_selected.connect(self._on_note_selected_for_count)
 
     def _on_new_note(self):
         folder_id = self.folder_tree.get_selected_folder_id()
         note_id = self.note_service.create("Untitled", folder_id)
         self.note_list.refresh()
         self.editor_widget.load_note(note_id)
-        signals.status_message.emit("New note created", 3000)
+        self._signals.status_message.emit("New note created", 3000)
 
     def _on_new_folder(self):
         name, ok = QInputDialog.getText(self, "New Folder", "Folder name:")
         if ok and name.strip():
             parent_id = self.folder_tree.get_selected_folder_id()
             self.folder_service.create(name.strip(), parent_id)
-            signals.folder_changed.emit()
-            signals.status_message.emit(f'Folder "{name}" created', 3000)
+            self._signals.folder_changed.emit()
+            self._signals.status_message.emit(f'Folder "{name}" created', 3000)
 
     def _update_word_count(self, note_id: int):
         note = self.note_service.get_by_id(note_id)

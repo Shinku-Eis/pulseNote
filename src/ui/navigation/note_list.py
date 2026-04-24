@@ -4,7 +4,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
 
 from ...services.note_service import NoteService
-from ..signals import signals
+from ..signals import get_signals
 
 
 class NoteList(QListWidget):
@@ -14,6 +14,7 @@ class NoteList(QListWidget):
     def __init__(self, note_service: NoteService, parent=None):
         super().__init__(parent)
         self._note_service = note_service
+        self._signals = get_signals()
         self._current_folder_id = None
         self._setup_ui()
         self._connect_signals()
@@ -25,10 +26,10 @@ class NoteList(QListWidget):
 
     def _connect_signals(self):
         self.itemClicked.connect(self._on_item_clicked)
-        signals.folder_selected.connect(self.load_folder)
-        signals.note_created.connect(lambda _: self.refresh())
-        signals.note_deleted.connect(lambda _: self.refresh())
-        signals.note_list_refresh.connect(self.refresh)
+        self._signals.folder_selected.connect(self.load_folder)
+        self._signals.note_created.connect(lambda _: self.refresh())
+        self._signals.note_deleted.connect(lambda _: self.refresh())
+        self._signals.note_list_refresh.connect(self.refresh)
 
     def load_folder(self, folder_id: int | None):
         self._current_folder_id = folder_id
@@ -46,7 +47,7 @@ class NoteList(QListWidget):
     def _on_item_clicked(self, item: QListWidgetItem):
         note_id = item.data(Qt.ItemDataRole.UserRole)
         self.note_selected.emit(note_id)
-        signals.note_selected.emit(note_id)
+        self._signals.note_selected.emit(note_id)
 
     def _show_context_menu(self, pos):
         item = self.itemAt(pos)
@@ -62,5 +63,5 @@ class NoteList(QListWidget):
     def _on_delete(self, item: QListWidgetItem):
         note_id = item.data(Qt.ItemDataRole.UserRole)
         self._note_service.delete(note_id)
-        signals.note_deleted.emit(note_id)
-        signals.status_message.emit("Note deleted", 3000)
+        self._signals.note_deleted.emit(note_id)
+        self._signals.status_message.emit("Note deleted", 3000)

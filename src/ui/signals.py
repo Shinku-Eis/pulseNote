@@ -1,16 +1,10 @@
-"""Centralized signals for cross-module communication."""
+"""Centralized signals for cross-module communication.
+PyInstaller compatible - NO module-level QObject creation!
+"""
 from PyQt6.QtCore import QObject, pyqtSignal
 
 
-class Signals(QObject):
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
+class _Signals(QObject):
     note_selected = pyqtSignal(int)
     note_saved = pyqtSignal(int)
     note_created = pyqtSignal(int)
@@ -35,4 +29,12 @@ class Signals(QObject):
     status_message = pyqtSignal(str, int)
 
 
-signals = Signals()
+_instance = None
+
+
+def get_signals():
+    """Call this ONLY AFTER QApplication is created!"""
+    global _instance
+    if _instance is None:
+        _instance = _Signals()
+    return _instance

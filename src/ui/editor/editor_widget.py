@@ -1,11 +1,11 @@
 """Main editor widget with markdown source and preview."""
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QSplitter, QToolBar, QAction
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QSplitter
 from PyQt6.QtCore import Qt, QTimer
 
 from ...services.note_service import NoteService
 from ...services.image_service import ImageService
 from ...services.link_service import LinkService
-from ..signals import signals
+from ..signals import get_signals
 from .markdown_editor import MarkdownEditor
 from .preview_panel import PreviewPanel
 
@@ -17,6 +17,7 @@ class EditorWidget(QWidget):
         self._note_service = note_service
         self._image_service = image_service
         self._link_service = link_service
+        self._signals = get_signals()
         self._current_note_id = None
         self._autosave_timer = QTimer()
         self._autosave_timer.setInterval(2000)
@@ -55,7 +56,7 @@ class EditorWidget(QWidget):
     def _connect_signals(self):
         self._editor.textChanged.connect(self._on_text_changed)
         self._title_edit.textChanged.connect(self._on_title_changed)
-        signals.note_created.connect(self.load_note)
+        self._signals.note_created.connect(self.load_note)
 
     def _on_text_changed(self):
         self._preview.render(self._editor.toPlainText())
@@ -86,4 +87,4 @@ class EditorWidget(QWidget):
             note.title = self._title_edit.text() or "Untitled"
             note.content = self._editor.toPlainText()
             self._note_service.update(note)
-            signals.note_saved.emit(self._current_note_id)
+            self._signals.note_saved.emit(self._current_note_id)
