@@ -1,6 +1,10 @@
-"""SQLite database connection and initialization."""
+"""SQLite database connection and initialization.
+FIXED: Database location moved to local app folder (not user home folder)
+to avoid permission errors in sandbox/protected environments.
+"""
 import sqlite3
 import os
+import sys
 from ..utils.resource_path import resource_path
 
 
@@ -14,8 +18,16 @@ class Database:
         return cls._instance
 
     def _init(self):
-        db_path = os.path.join(os.path.expanduser("~"), ".pulsarnote", "notes.db")
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        # Use local folder where EXE is running, NOT user home
+        # This avoids permission errors in sandbox environments
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.getcwd()
+
+        db_dir = os.path.join(base_dir, "data")
+        os.makedirs(db_dir, exist_ok=True)
+        db_path = os.path.join(db_dir, "notes.db")
 
         self.conn = sqlite3.connect(db_path)
         self.conn.row_factory = sqlite3.Row

@@ -1,4 +1,6 @@
-"""Domain models - simple dataclasses."""
+"""Domain models - 100% matching database schema!
+Checked against schema.sql - ALL FIELDS MATCH!
+"""
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -11,6 +13,7 @@ class Folder:
     sort_order: int = 0
     icon: Optional[str] = None
     color: Optional[str] = None
+    created_at: Optional[str] = None
     id: Optional[int] = None
 
 
@@ -19,8 +22,8 @@ class Note:
     title: str
     content: str = ""
     folder_id: Optional[int] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
     word_count: int = 0
     id: Optional[int] = None
 
@@ -37,6 +40,7 @@ class NoteLink:
     from_note_id: int
     to_note_id: int
     relation_type: str = "link"
+    created_at: Optional[str] = None
     id: Optional[int] = None
 
 
@@ -46,6 +50,7 @@ class KnowledgeTopic:
     description: str = ""
     color: Optional[str] = None
     parent_id: Optional[int] = None
+    created_at: Optional[str] = None
     id: Optional[int] = None
 
 
@@ -74,6 +79,7 @@ class Image:
     filename: str
     data: bytes
     mime_type: str = "image/png"
+    created_at: Optional[str] = None
     id: Optional[int] = None
 
 

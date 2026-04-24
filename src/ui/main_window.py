@@ -94,9 +94,9 @@ class MainWindow(QMainWindow):
         self.exit_action.triggered.connect(self.close)
 
         self.undo_action = QAction("&Undo", self)
-        self.undo_action.setShortcut(QKeySequence.Undo)
+        self.undo_action.setShortcut(QKeySequence("Ctrl+Z"))
         self.redo_action = QAction("&Redo", self)
-        self.redo_action.setShortcut(QKeySequence.Redo)
+        self.redo_action.setShortcut(QKeySequence("Ctrl+Y"))
         self.find_action = QAction("&Find...", self)
         self.find_action.setShortcut(QKeySequence("Ctrl+F"))
 
