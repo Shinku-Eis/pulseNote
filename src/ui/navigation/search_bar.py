@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QListWidget, QListW
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from ...services.search_service import SearchService
-from ..signals import signals
 
 
 class SearchBar(QWidget):

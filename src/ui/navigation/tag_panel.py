@@ -3,7 +3,6 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QListWidget, QListWidgetItem
 from PyQt6.QtCore import Qt
 
 from ...services.tag_service import TagService
-from ..signals import signals
 
 
 class TagPanel(QWidget):
